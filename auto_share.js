@@ -1,6 +1,7 @@
 (function(){
     const statusDiv = document.createElement("div");
     statusDiv.style.cssText = "position: fixed; top: 0px; left: 0px; z-index: 999; color: white; background: red; padding: 2px";
+    document.body.appendChild(statusDiv);
     const  ajaxSuccessEvent = "lprequestend";
     const inventoryTagClass = ".inventory-tag";
     const shareButtonClass = ".share";
@@ -41,7 +42,6 @@
 
     const shareActiveListings = () => {
         statusDiv.innerText = "Starting to share items.";
-        document.body.appendChild(statusDiv);
         const shareModal = document.querySelector(shareModalId);
         const shareToFollowersButton = shareModal.querySelector(followerShareClass);
         const activeTiles = shuffle(getActiveTiles());
