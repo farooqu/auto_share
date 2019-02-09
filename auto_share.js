@@ -48,7 +48,8 @@
             shareToFollowersButton.click();
 
             if(currentTileIndex < activeTiles.length){
-                window.setTimeout(shareNextActiveTile, 500);
+                let waitTime = Math.floor(Math.random() * Math.floor(4)) + 1;
+                window.setTimeout(shareNextActiveTile, waitTime * 1000);
             }
         };
         shareNextActiveTile();
