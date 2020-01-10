@@ -1,54 +1,80 @@
-(function(){
-    const  ajaxSuccessEvent = "lprequestend";
+(function () {
+    const shareType = window.prompt("Share with 'followers' or 'party'", "followers");
+    const statusDiv = document.createElement("div");
+    const statusDivColor = shareType === "party" ? "green" : "red";
+    statusDiv.style.cssText = `position: fixed; top: 0px; left: 0px; z-index: 999; color: white; background: ${statusDivColor}; padding: 2px`;
+    document.body.appendChild(statusDiv);
+
+    const loadingIndicatorId = "#load-more";
     const inventoryTagClass = ".inventory-tag";
     const shareButtonClass = ".share";
     const shareModalId = "#share-popup";
-    const followerShareClass = ".pm-followers-share-link";
+    const followerShareClass = `.pm-${shareType}-share-link`;
 
     const getWindowHeight = () => document.body.offsetHeight;
-    const scrollToBottomOfPage = () => window.scrollTo(0, getWindowHeight());
+
+    const scrollToBottomOfPage = () => {
+        statusDiv.innerText = "Scrolling...";
+        window.scrollTo(0, getWindowHeight());
+    };
+
     const getAllTiles = () => document.querySelectorAll(".tile");
+
     const getActiveTiles = () => {
         const allTiles = getAllTiles();
-
-        return Array.prototype.filter.call(allTiles, 
-            tile => tile.querySelector(inventoryTagClass) === null)
+        return Array.prototype.filter.call(allTiles, tile => tile.querySelector(inventoryTagClass) === null)
     };
+
+    const shuffle = (array) => {
+        let currentIndex = array.length,
+            temporaryValue,
+            randomIndex; /* While there remain elements to shuffle... / while (0 !== currentIndex) { / Pick a remaining element... / randomIndex = Math.floor(Math.random() * currentIndex); currentIndex -= 1; / And swap it with the current element. */
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+        return array;
+    };
+
     const getShareButton = t => t.querySelector(shareButtonClass);
 
     const shareActiveListings = () => {
+        statusDiv.innerText = "Starting to share items.";
         const shareModal = document.querySelector(shareModalId);
         const shareToFollowersButton = shareModal.querySelector(followerShareClass);
-        const activeTiles = getActiveTiles();
+        const activeTiles = shuffle(getActiveTiles());
         let currentTileIndex = 0;
-
         const shareNextActiveTile = () => {
+            statusDiv.innerText = `Item ${currentTileIndex + 1} of ${activeTiles.length}, sharing...`;
             const currentTile = activeTiles[currentTileIndex++];
             const shareButton = getShareButton(currentTile);
-
             shareButton.click();
             shareToFollowersButton.click();
-
-            if(currentTileIndex < activeTiles.length){
-                window.setTimeout(shareNextActiveTile, 500);
+            if (currentTileIndex < activeTiles.length) {
+                let waitTime = Math.floor(Math.random() * Math.floor(4)) + 1;
+                window.setTimeout(shareNextActiveTile, waitTime * 1000);
+                statusDiv.innerText = `Item ${currentTileIndex + 1} of ${activeTiles.length}, shared, waiting...`;
+            } else {
+                window.alert("All Done Meri Jaan! I love you!");
+                statusDiv.remove();
             }
         };
         shareNextActiveTile();
     };
 
-    let lastWindowHeight = getWindowHeight();
+    const isLoading = () => document.querySelector(loadingIndicatorId).offsetParent !== null;
 
-    const checkHeightAndScroll = () => {
-        const newHeight = getWindowHeight();
-        if (newHeight !== lastWindowHeight){
-            lastWindowHeight = newHeight;
-            scrollToBottomOfPage();
-        } else {
-            window.removeEventListener(ajaxSuccessEvent, checkHeightAndScroll);
-            shareActiveListings();
+    let lastWindowHeight;
+    const intervalId = window.setInterval(() => {
+        if (!isLoading()) {
+            statusDiv.innerText = "Checking Height...";
+            const newHeight = getWindowHeight();
+            if (newHeight !== lastWindowHeight) {
+                lastWindowHeight = newHeight;
+                scrollToBottomOfPage();
+            } else {
+                window.clearInterval(intervalId);
+                shareActiveListings();
+            }
         }
-    };
-
-    window.addEventListener(ajaxSuccessEvent, checkHeightAndScroll);
-    scrollToBottomOfPage();
+    }, 1000);
 })();
