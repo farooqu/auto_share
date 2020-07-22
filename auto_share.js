@@ -2,14 +2,14 @@
     const shareType = window.prompt("Share with 'followers' or 'party'", "followers");
     const statusDiv = document.createElement("div");
     const statusDivColor = shareType === "party" ? "green" : "red";
-    statusDiv.style.cssText = `position: fixed; top: 0px; left: 0px; z-index: 999; color: white; background: ${statusDivColor}; padding: 2px`;
+    statusDiv.style.cssText = `position: fixed; top: 0px; left: 0px; z-index: 9999; color: white; background: ${statusDivColor}; padding: 2px`;
     document.body.appendChild(statusDiv);
 
-    const loadingIndicatorId = "#load-more";
-    const inventoryTagClass = ".inventory-tag";
-    const shareButtonClass = ".share";
-    const shareModalId = "#share-popup";
-    const followerShareClass = `.pm-${shareType}-share-link`;
+    const loadingIndicatorId = "#infinite-scroll";
+    const inventoryTagClass = ".tile__inventory-tag";
+    const shareButtonClass = ".social-action-bar__share";
+    const shareModalId = ".share-modal";
+    const followerShareClass = `[data-et-name=share_poshmark${shareType === "party" ? "_poshparty" : ""}]`;
 
     const getWindowHeight = () => document.body.offsetHeight;
 
@@ -37,17 +37,24 @@
 
     const getShareButton = t => t.querySelector(shareButtonClass);
 
+    const waitForElement = async selector => {
+        while (document.querySelector(selector) === null) {
+            await new Promise(resolve => requestAnimationFrame(resolve));
+        }
+        return document.querySelector(selector);
+    };
+
     const shareActiveListings = () => {
         statusDiv.innerText = "Starting to share items.";
-        const shareModal = document.querySelector(shareModalId);
-        const shareToFollowersButton = shareModal.querySelector(followerShareClass);
         const activeTiles = shuffle(getActiveTiles());
         let currentTileIndex = 0;
-        const shareNextActiveTile = () => {
+        const shareNextActiveTile = async () => {
             statusDiv.innerText = `Item ${currentTileIndex + 1} of ${activeTiles.length}, sharing...`;
             const currentTile = activeTiles[currentTileIndex++];
             const shareButton = getShareButton(currentTile);
             shareButton.click();
+            const shareModal = await waitForElement(shareModalId);
+            const shareToFollowersButton = await waitForElement(followerShareClass);
             shareToFollowersButton.click();
             if (currentTileIndex < activeTiles.length) {
                 let waitTime = Math.floor(Math.random() * Math.floor(4)) + 1;
@@ -61,7 +68,7 @@
         shareNextActiveTile();
     };
 
-    const isLoading = () => document.querySelector(loadingIndicatorId).offsetParent !== null;
+    const isLoading = () => !!document.querySelector(loadingIndicatorId)?.offsetParent;
 
     let lastWindowHeight;
     const intervalId = window.setInterval(() => {
