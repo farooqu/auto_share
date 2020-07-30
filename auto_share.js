@@ -1,40 +1,31 @@
 (function(){
-  const wait = (ms) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(ms)
-      }, ms )
-    })
-  }
-
     const  ajaxSuccessEvent = "lprequestend";
-    const shareButtonSelector = ".social-action-bar__share";
-    const shareModalSelector = ".share-modal";
-    const followerShareClass = ".internal-share__link";
+    const inventoryTagClass = ".inventory-tag";
+    const shareButtonClass = ".share";
+    const shareModalId = "#share-popup";
+    const followerShareClass = ".pm-followers-share-link";
 
     const isVisible = el => el.offsetParent !== null || getComputedStyle(el).display !== "none";
     const getCaptchaElement = () => document.querySelector("#captcha-popup");
     const getWindowHeight = () => document.body.offsetHeight;
     const scrollToBottomOfPage = () => window.scrollTo(0, getWindowHeight());
-    const tileContainsInventoryTag = tile => {
-      const inventoryTagSelector = "[class*='inventory-tag']";
-      return tile.querySelector(inventoryTagSelector) !== null;
-    }
     const getAllTiles = () => document.querySelectorAll(".tile");
     const getActiveTiles = () => {
         const allTiles = getAllTiles();
 
         return Array.prototype.filter.call(allTiles,
-            tile => !!tileContainsInventoryTag(tile))
+            tile => tile.querySelector(inventoryTagClass) === null)
     };
-    const getShareButton = t => t.querySelector(shareButtonSelector);
+    const getShareButton = t => t.querySelector(shareButtonClass);
 
-    const shareActiveListings = async () => {
+    const shareActiveListings = () => {
+        const shareModal = document.querySelector(shareModalId);
+        const shareToFollowersButton = shareModal.querySelector(followerShareClass);
         const activeTiles = getActiveTiles();
         let currentTileIndex = 0;
         let captchaEl = getCaptchaElement();
 
-        const shareNextActiveTile = async () => {
+        const shareNextActiveTile = () => {
             captchaEl = captchaEl || getCaptchaElement();
 
             if (!captchaEl || !isVisible(captchaEl)){
@@ -42,9 +33,6 @@
                 const shareButton = getShareButton(currentTile);
 
                 shareButton.click();
-                await wait(100);
-                const shareModal = document.querySelector(shareModalSelector);
-                const shareToFollowersButton = shareModal.querySelector(followerShareClass);
                 shareToFollowersButton.click();
             }
 
@@ -55,23 +43,19 @@
         shareNextActiveTile();
     };
 
-    let lastWindowHeight = 0;
+    let lastWindowHeight = getWindowHeight();
 
-    const loadCloset = () => {
+    const checkHeightAndScroll = () => {
         const newHeight = getWindowHeight();
-        const allTiles = getAllTiles();
-        const lastTile = allTiles[allTiles.length - 1];
-        const lastTileContainsInventoryTag = tileContainsInventoryTag(lastTile);
-
-        if (newHeight !== lastWindowHeight && !lastTileContainsInventoryTag){
+        if (newHeight !== lastWindowHeight){
             lastWindowHeight = newHeight;
             scrollToBottomOfPage();
         } else {
-            window.removeEventListener(ajaxSuccessEvent, loadCloset);
+            window.removeEventListener(ajaxSuccessEvent, checkHeightAndScroll);
             shareActiveListings();
         }
     };
 
-    window.addEventListener(ajaxSuccessEvent, loadCloset);
-    loadCloset();
+    window.addEventListener(ajaxSuccessEvent, checkHeightAndScroll);
+    scrollToBottomOfPage();
 })();
