@@ -1,0 +1,15 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+            "chrome": "84"
+        }
+      }
+    ],
+    "minify"
+  ],
+  "comments": false,
+  "sourceType": "script"
+}
