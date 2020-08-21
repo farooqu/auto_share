@@ -7,10 +7,10 @@
   document.body.appendChild(statusDiv);
 
   const loadingIndicatorId = '#infinite-scroll';
-  const inventoryTagClass = '.tile__inventory-tag';
-  const shareButtonClass = '.social-action-bar__share';
-  const shareModalId = '.share-modal';
-  const followerShareClass = `[data-et-name=share_poshmark${shareType === 'party' ? '_poshparty' : ''}]`;
+  const inventoryTagClass = '.inventory-tag';
+  const shareButtonClass = '.share';
+  const shareModalId = '#share-popup';
+  const followerShareClass = `.pm-${shareType}-share-link`;
 
   const getWindowHeight = () => document.body.offsetHeight;
 
