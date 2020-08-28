@@ -6,11 +6,22 @@
   statusDiv.style.cssText = `position: fixed; top: 0px; left: 0px; z-index: 9999; color: white; background: ${statusDivColor}; padding: 2px`;
   document.body.appendChild(statusDiv);
 
-  const loadingIndicatorId = '#infinite-scroll';
-  const inventoryTagClass = '.inventory-tag';
-  const shareButtonClass = '.share';
-  const shareModalId = '#share-popup';
-  const followerShareClass = `.pm-${shareType}-share-link`;
+  // Poshmark seems to be switching back and forth between these two selectors
+  const selectors = document.querySelectorAll('.share').length
+    ? {
+      loadingIndicatorId: '#infinite-scroll',
+      inventoryTagClass: '.inventory-tag',
+      shareButtonClass: '.share',
+      shareModalId: '#share-popup',
+      followerShareClass: `.pm-${shareType}-share-link`,
+    }
+    : {
+      loadingIndicatorId: '#infinite-scroll',
+      inventoryTagClass: '.tile__inventory-tag',
+      shareButtonClass: '.social-action-bar__share',
+      shareModalId: '.share-modal',
+      followerShareClass: `[data-et-name=share_poshmark${shareType === 'party' ? '_poshparty' : ''}]`,
+    };
 
   const getWindowHeight = () => document.body.offsetHeight;
 
@@ -25,11 +36,11 @@
     const allTiles = getAllTiles();
     return Array.prototype.filter.call(
       allTiles,
-      (tile) => tile.querySelector(inventoryTagClass) === null,
+      (tile) => tile.querySelector(selectors.inventoryTagClass) === null,
     );
   };
 
-  const getShareButton = (t) => t.querySelector(shareButtonClass);
+  const getShareButton = (t) => t.querySelector(selectors.shareButtonClass);
 
   const waitForElement = async (selector) => {
     while (document.querySelector(selector) === null) {
@@ -49,8 +60,8 @@
       currentTileIndex += 1;
       const shareButton = getShareButton(currentTile);
       shareButton.click();
-      await waitForElement(shareModalId);
-      const shareToFollowersButton = await waitForElement(followerShareClass);
+      await waitForElement(selectors.shareModalId);
+      const shareToFollowersButton = await waitForElement(selectors.followerShareClass);
       shareToFollowersButton.click();
       if (currentTileIndex < activeTiles.length) {
         const waitTime = Math.floor(Math.random() * Math.floor(4)) + 1;
@@ -64,7 +75,7 @@
     shareNextActiveTile();
   };
 
-  const isLoading = () => !!document.querySelector(loadingIndicatorId)?.offsetParent;
+  const isLoading = () => !!document.querySelector(selectors.loadingIndicatorId)?.offsetParent;
 
   let lastWindowHeight;
   const intervalId = window.setInterval(() => {
