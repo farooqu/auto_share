@@ -32,13 +32,9 @@
 
   const getAllTiles = () => document.querySelectorAll('.tile');
 
-  const getActiveTiles = () => {
-    const allTiles = getAllTiles();
-    return Array.prototype.filter.call(
-      allTiles,
-      (tile) => tile.querySelector(selectors.inventoryTagClass) === null,
-    );
-  };
+  const getActiveTiles = () => (
+    getAllTiles().filter((tile) => tile.querySelector(selectors.inventoryTagClass) === null)
+  );
 
   const getShareButton = (t) => t.querySelector(selectors.shareButtonClass);
 
@@ -52,7 +48,7 @@
 
   const shareActiveListings = () => {
     statusDiv.innerText = 'Starting to share items.';
-    const activeTiles = getActiveTiles();
+    const activeTiles = getActiveTiles().reverse();
     let currentTileIndex = 0;
     const shareNextActiveTile = async () => {
       statusDiv.innerText = `Item ${currentTileIndex + 1} of ${activeTiles.length}, sharing...`;
