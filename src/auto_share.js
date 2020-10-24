@@ -12,6 +12,7 @@
   // Poshmark seems to be switching back and forth between these two selectors
   const selectors = document.querySelectorAll(".share").length
     ? {
+        captchaId: "#captcha-popup",
         loadingIndicatorId: "#infinite-scroll",
         inventoryTagClass: ".inventory-tag",
         shareButtonClass: ".share",
@@ -19,6 +20,7 @@
         followerShareClass: `.pm-${shareType}-share-link`,
       }
     : {
+        captchaId: "#captcha-popup",
         loadingIndicatorId: "#infinite-scroll",
         inventoryTagClass: ".tile__inventory-tag",
         shareButtonClass: ".social-action-bar__share",
@@ -27,6 +29,11 @@
           shareType === "party" ? "_poshparty" : ""
         }]`,
       };
+
+  const isVisible = (el) =>
+    (el && el.offsetParent !== null) || getComputedStyle(el).display !== null;
+
+  const getCaptcha = () => document.querySelector(selectors.captchaId);
 
   const getWindowHeight = () => document.body.offsetHeight;
 
@@ -54,30 +61,48 @@
 
   const shareActiveListings = () => {
     statusDiv.innerText = "Starting to share items.";
+
     const activeTiles = getActiveTiles().reverse();
     let currentTileIndex = 0;
+
     const shareNextActiveTile = async () => {
-      statusDiv.innerText = `Item ${currentTileIndex + 1} of ${
-        activeTiles.length
-      }, sharing...`;
-      const currentTile = activeTiles[currentTileIndex];
-      currentTileIndex += 1;
-      const shareButton = getShareButton(currentTile);
-      shareButton.click();
-      await waitForElement(selectors.shareModalId);
-      const shareToFollowersButton = await waitForElement(
-        selectors.followerShareClass
-      );
-      shareToFollowersButton.click();
+      const captchaVisible = isVisible(getCaptcha());
+
+      if (!captchaVisible) {
+        statusDiv.innerText = `Item ${currentTileIndex + 1} of ${
+          activeTiles.length
+        }, sharing...`;
+
+        const currentTile = activeTiles[currentTileIndex];
+        currentTileIndex += 1;
+
+        const shareButton = getShareButton(currentTile);
+        shareButton.click();
+
+        await waitForElement(selectors.shareModalId);
+
+        const shareToFollowersButton = await waitForElement(
+          selectors.followerShareClass
+        );
+        shareToFollowersButton.click();
+      }
+
       if (currentTileIndex < activeTiles.length) {
         const waitTime = Math.floor(Math.random() * Math.floor(4)) + 1;
+
+        statusDiv.innerText = `Item ${currentTileIndex} of ${
+          activeTiles.length
+        }, ${
+          captchaVisible ? "captcha present" : "shared"
+        }, waiting ${waitTime} seconds...`;
+
         window.setTimeout(shareNextActiveTile, waitTime * 1000);
-        statusDiv.innerText = `Item ${currentTileIndex} of ${activeTiles.length}, shared, waiting...`;
       } else {
         window.alert("All Done Meri Jaan! I love you!");
         statusDiv.remove();
       }
     };
+
     shareNextActiveTile();
   };
 
