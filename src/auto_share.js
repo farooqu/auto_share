@@ -12,7 +12,7 @@
   // Poshmark seems to be switching back and forth between these two selectors
   const selectors = document.querySelectorAll(".share").length
     ? {
-        captchaId: "#captcha-popup",
+        captcha: ".modal iframe[src*='captcha']",
         loadingIndicatorId: "#infinite-scroll",
         inventoryTagClass: ".inventory-tag",
         shareButtonClass: ".share",
@@ -20,7 +20,7 @@
         followerShareClass: `.pm-${shareType}-share-link`,
       }
     : {
-        captchaId: "#captcha-popup",
+        captcha: ".modal iframe[src*='captcha']",
         loadingIndicatorId: "#infinite-scroll",
         inventoryTagClass: ".tile__inventory-tag",
         shareButtonClass: ".social-action-bar__share",
@@ -31,9 +31,9 @@
       };
 
   const isVisible = (el) =>
-    (el && el.offsetParent !== null) || getComputedStyle(el).display !== null;
+    !!el && (!!el.offsetParent || !!getComputedStyle(el).display);
 
-  const getCaptcha = () => document.querySelector(selectors.captchaId);
+  const getCaptcha = () => document.querySelector(selectors.captcha);
 
   const getWindowHeight = () => document.body.offsetHeight;
 
@@ -45,7 +45,8 @@
   const getAllTiles = () => document.querySelectorAll(".tile");
 
   const getActiveTiles = () =>
-    getAllTiles().filter(
+    Array.prototype.filter.call(
+      getAllTiles(),
       (tile) => tile.querySelector(selectors.inventoryTagClass) === null
     );
 
