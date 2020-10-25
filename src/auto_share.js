@@ -1,4 +1,3 @@
-// eslint-disable-next-line func-names
 (function () {
   const shareType = window.prompt(
     "Share with 'followers' or 'party'",
@@ -54,7 +53,6 @@
 
   const waitForElement = async (selector) => {
     while (document.querySelector(selector) === null) {
-      /* eslint-disable-next-line no-await-in-loop */
       await new Promise((resolve) => requestAnimationFrame(resolve));
     }
     return document.querySelector(selector);

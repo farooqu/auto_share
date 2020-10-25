@@ -1,0 +1,1 @@
+(function(){const a=()=>!!document.querySelector("#infinite-scroll")?.offsetParent,b=()=>document.body.offsetHeight,c=()=>{window.scrollTo(0,b());};let d;const e=window.setInterval(()=>{if(!a()){const a=b();a===d?window.clearInterval(e):(d=a,c());}},1e3);})();
